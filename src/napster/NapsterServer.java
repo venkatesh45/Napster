@@ -34,7 +34,7 @@ public class NapsterServer {
             e.printStackTrace();
         }
         try {
-           Thread.sleep(30000);
+           Thread.sleep(3000000);
        } catch (InterruptedException e) {
            
            e.printStackTrace();

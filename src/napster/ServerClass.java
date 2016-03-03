@@ -7,36 +7,27 @@ package napster;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.Hashtable;
+
 
 
 
 public class ServerClass implements ServerInterface,Serializable {
     
-    HashMap<String,Integer> registerValue = new HashMap<>();
+    Hashtable<String,Integer> registerValue = new Hashtable<>();
     int[] matchingPeerID=new int[10];
     @Override
     public void insertToRegistry(int peerID, String filename) throws RemoteException {
-         registerValue.put(filename,peerID);
+        registerValue.put(filename,peerID);
     }
 
     @Override
     public int peerSearch(String filename) throws RemoteException {
-      /*int i=0;
-        for (Map.Entry<String, Integer> entry : registerValue.entrySet()){
-          if(entry.getKey().equals(filename)){
-            matchingPeerID[i]=(int) entry.getValue();
-            i++;
+        
+        if(registerValue.containsKey(filename)){
+            return registerValue.get(filename);
         }
-      }        
-     return matchingPeerID;*/
-      if(registerValue.containsKey(filename)){
-        return registerValue.get(filename);
-    }
-      System.out.println("The file does not exist.");
-    return 0;
-    }
-    
+        else 
+            return 0;
+    } 
 }
