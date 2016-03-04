@@ -14,10 +14,13 @@ import java.lang.Exception;
 public class ThreadMainClass {
     public static void main(String[] args){
        
+        String HostNumber;
+        HostNumber = "8087";
         ThreadClient tc=new ThreadClient();
         ThreadServer ts=new ThreadServer();
-        Thread t1=new Thread(tc);
-        Thread t2=new Thread(ts);
+        
+        Thread t1=new Thread(tc,HostNumber);
+        Thread t2=new Thread(ts,HostNumber);
         t1.start();
         t2.start();
        

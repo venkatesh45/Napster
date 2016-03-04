@@ -10,7 +10,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,10 +22,9 @@ import java.util.logging.Logger;
  */
 class ThreadClient implements Runnable {
     public static int ID;
-    Scanner sc;
-    
-    
-    
+    static Scanner sc;
+    public static int serverToConnect;
+
     @Override
     public void run() {
        String hostName="localhost";
@@ -34,7 +33,8 @@ class ThreadClient implements Runnable {
        Registry registry = null;
        ServerInterface Si=null;
        String fileToSearch;
-       int found=0;
+       ArrayList<Integer> found=new ArrayList<>();
+       
        try {
             registry = LocateRegistry.getRegistry(hostName,port);
         } catch (RemoteException ex) {
@@ -45,7 +45,8 @@ class ThreadClient implements Runnable {
         } catch (RemoteException | NotBoundException ex) {
             Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-       System.out.println("Successfully Connected");
+       System.out.println("Successfully Connected to Index server");
+       int portNumber=Integer.parseInt(Thread.currentThread().getName());
        
        sc=new Scanner(System.in);
        System.out.println("Enter PeerID(except zero):");
@@ -61,9 +62,10 @@ class ThreadClient implements Runnable {
                 Directory="FileThree\\";
                 break;
             default:
-                System.exit(-1);
+                System.exit(0);
         }
-       try {
+        try {
+            Si.insertPortNumber(ID, portNumber);
             loadIntoRegisterMethod(Si,Directory);
         } catch (RemoteException ex) {
             Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
@@ -75,12 +77,20 @@ class ThreadClient implements Runnable {
         } catch (RemoteException ex) {
             Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-        if (found==0){
-            System.out.println("File Not Found");
-            System.exit(-1);
-        }else{
-            System.out.println("File:"+fileToSearch+" found on Peer Number:"+found);
-          }
+        
+       for(int i=0;i<found.size();i++){
+           if(found.get(i)!=0){
+            System.out.println(found.get(i));
+           }
+           
+       }
+       System.out.println("Enter the peer you want to connect:");
+       int portnumber=sc.nextInt();
+        try {
+            serverToConnect=Si.returnPortNumber(portnumber);
+        } catch (RemoteException ex) {
+            Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
     }
     
@@ -88,9 +98,25 @@ class ThreadClient implements Runnable {
        ThreadClient tc;
        tc=new ThreadClient();
        tc.run();
-       System.out.println("Enter a peerID to get file:");
-       Scanner sc=new Scanner(System.in);
-       int peertoconnect=sc.nextInt();
+       Registry registry = null;
+       ClientInterface Ci=null;
+       String hostName="serverhost";
+       
+       try {
+            registry = LocateRegistry.getRegistry(hostName,serverToConnect);
+        } catch (RemoteException ex) {
+            Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            Ci=(ClientInterface)registry.lookup("Server");
+        } catch (RemoteException | NotBoundException ex) {
+            Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+       System.out.println("Successfully Connected");
+       
+       
+       
+       
        
     }
     public static void loadIntoRegisterMethod(ServerInterface Si, String arg) throws RemoteException {

@@ -6,28 +6,55 @@
 package napster;
 
 import java.io.Serializable;
-import java.rmi.RemoteException;
-import java.util.Hashtable;
+import java.rmi.*;
+import java.rmi.server.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 
 
 
-public class ServerClass implements ServerInterface,Serializable {
+
+public class ServerClass extends UnicastRemoteObject implements ServerInterface {
     
-    Hashtable<String,Integer> registerValue = new Hashtable<>();
-    int[] matchingPeerID=new int[10];
-    @Override
-    public void insertToRegistry(int peerID, String filename) throws RemoteException {
-        registerValue.put(filename,peerID);
+    ArrayList<Integer> PeerID=new ArrayList<>();
+    ArrayList<String> Filename=new ArrayList<>();
+    ArrayList<Integer> MatchingFilename=new ArrayList<>();
+    HashMap<Integer,Integer> portNumber=new HashMap<>();
+    
+    ServerClass() throws RemoteException{
+    super();
     }
 
     @Override
-    public int peerSearch(String filename) throws RemoteException {
-        
-        if(registerValue.containsKey(filename)){
-            return registerValue.get(filename);
+    public synchronized void insertToRegistry(int peerID, String filename) throws RemoteException {
+        PeerID.add(peerID);
+        Filename.add(filename);
+    }
+
+    @Override
+    public synchronized ArrayList<Integer> peerSearch(String filename) throws RemoteException {
+        int j=0;
+        for(int i=0;i<PeerID.size();i++){
+        if(Filename.get(i).equals(filename)){
+            MatchingFilename.add(j, PeerID.get(i));
+            j++;
         }
-        else 
-            return 0;
+        
+    }
+    return MatchingFilename;    
     } 
+
+    @Override
+    public synchronized void insertPortNumber(int peerID,int port) throws RemoteException {
+            portNumber.put(peerID, port);
+    }
+
+    @Override
+    public synchronized int returnPortNumber(int peerID) throws RemoteException {
+            if(portNumber.containsKey(peerID)){
+                return portNumber.get(peerID);
+            }
+            return 0;
+    }
 }
